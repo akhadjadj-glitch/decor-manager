@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Décor Manager">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="description" content="Gestion des photos de location de décors">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- iOS Icons -->
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+  
+  <!-- Splash Screens iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  
+  <title>Décor Manager</title>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    html {
+      height: -webkit-fill-available;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: linear-gradient(150deg, #0c0c18 0%, #1a1a2e 50%, #0f1729 100%);
+      color: #e2e8f0;
+      overscroll-behavior: none;
+      overflow-x: hidden;
+    }
+    
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    
+    input, textarea, button, select {
+      font-family: inherit;
+      font-size: 16px;
+    }
+    
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #6366f1 !important;
+    }
+
+    /* Install Banner */
+    .install-banner {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      padding: 16px 20px;
+      padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+      z-index: 9999;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .install-banner.show {
+      display: block;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    
+    .install-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .install-banner-icon {
+      font-size: 32px;
+    }
+    
+    .install-banner-text {
+      flex: 1;
+    }
+    
+    .install-banner-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+    
+    .install-banner-subtitle {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    .install-banner-btn {
+      background: white;
+      color: #6366f1;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .install-banner-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      opacity: 0.7;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    }
+    
+    .logo-text h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .logo-text span {
+      font-size: 12px;
+      color: #64748b;
+    }
+    
+    .menu-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Content */
+    .content {
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+    
+    .card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .card:active {
+      transform: scale(0.98);
+    }
+    
+    .card-cover {
+      aspect-ratio: 4/3;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .card-cover .placeholder {
+      font-size: 40px;
+      opacity: 0.3;
+    }
+    
+    .card-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .card-body {
+      padding: 16px;
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .card-meta {
+      font-size: 13px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
+      border: none;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+      z-index: 50;
+    }
+    
+    .fab:active {
+      transform: scale(0.95);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+    }
+    
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #94a3b8;
+    }
+    
+    .empty-text {
+      color: #64748b;
+      font-size: 15px;
+    }
+
+    /* Back button */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #6366f1;
+      font-size: 16px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 0;
+      margin-bottom: 16px;
+    }
+
+    /* Section */
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 0 0 8px 0;
+    }
+    
+    .section-meta {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0 0 24px 0;
+    }
+
+    /* Action bar */
+    .action-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    
+    .action-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .action-btn.danger {
+      color: #ef4444;
+    }
+    
+    .action-btn:active {
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Rental card */
+    .rental-card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    
+    .rental-card:active {
+      background: rgba(255,255,255,0.06);
+    }
+    
+    .rental-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+    
+    .rental-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #f1f5f9;
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .rental-dates {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: #94a3b8;
+      flex-wrap: wrap;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .badge.upcoming {
+      background: rgba(99,102,241,0.15);
+      color: #6366f1;
+    }
+    
+    .badge.active {
+      background: rgba(245,158,11,0.15);
+      color: #f59e0b;
+    }
+    
+    .badge.completed {
+      background: rgba(16,185,129,0.15);
+      color: #10b981;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed rgba(99, 102, 241, 0.4);
+      border-radius: 20px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(99, 102, 241, 0.05);
+      margin-bottom: 24px;
+      transition: all 0.2s ease;
+    }
+    
+    .dropzone.active {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.15);
+    }
+    
+    .dropzone-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    
+    .dropzone-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+    
+    .dropzone-text {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    /* Photo grid */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    
+    @media (min-width: 768px) {
+      .photo-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+    }
+    
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background: #1e293b;
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .modal-overlay.show .modal-content {
+      transform: translateY(0);
+    }
+    
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 24px 0;
+      color: #f1f5f9;
+      text-align: center;
+    }
+
+    /* Form */
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.3);
+      color: #f1f5f9;
+      -webkit-appearance: none;
+    }
+    
+    .input-group textarea {
+      resize: none;
+      min-height: 100px;
+    }
+    
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 16px 24px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+      margin-bottom: 12px;
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    /* Side menu */
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .menu-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .menu-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 300px;
+      max-width: 85vw;
+      background: #1e293b;
+      padding: 24px;
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 501;
+      overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .menu-overlay.show .menu-panel {
+      transform: translateX(0);
+    }
+    
+    .menu-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 24px 0;
+      color: #f1f5f9;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      background: rgba(255,255,255,0.03);
+    }
+    
+    .menu-item:active {
+      background: rgba(255,255,255,0.08);
+    }
+    
+    .menu-item input[type="file"] {
+      display: none;
+    }
+    
+    .menu-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .menu-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    
+    .menu-tip {
+      margin-top: 32px;
+      padding: 16px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .menu-tip-title {
+      font-size: 13px;
+      color: #a5b4fc;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    
+    .menu-tip-text {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Photo viewer */
+    .photo-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .photo-viewer.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .photo-viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      padding-top: max(16px, env(safe-area-inset-top));
+    }
+    
+    .photo-viewer-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 8px;
+    }
+    
+    .photo-viewer-count {
+      color: #64748b;
+      font-size: 14px;
+    }
+    
+    .photo-viewer-img {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+    
+    .photo-viewer-img img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .photo-viewer-actions {
+      padding: 20px;
+      padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px));
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Title with badge */
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Install Banner -->
+    <div class="install-banner" id="install-banner">
+      <div class="install-banner-content">
+        <span class="install-banner-icon">📲</span>
+        <div class="install-banner-text">
+          <div class="install-banner-title">Installer l'application</div>
+          <div class="install-banner-subtitle">Accès rapide depuis l'écran d'accueil</div>
+        </div>
+        <button class="install-banner-btn" id="install-btn">Installer</button>
+        <button class="install-banner-close" onclick="dismissInstallBanner()">×</button>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">🎬</div>
+        <div class="logo-text">
+          <h1>Décor Manager</h1>
+          <span>Photos de location</span>
+        </div>
+      </div>
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- Content -->
+    <main class="content" id="main-content">
+      <div class="loading"><div class="spinner"></div></div>
+    </main>
+
+    <!-- FAB -->
+    <button class="fab" id="fab" onclick="handleFabClick()">+</button>
+
+    <!-- New Decor Modal -->
+    <div class="modal-overlay" id="decor-modal">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h2 class="modal-title">✨ Nouveau Décor</h2>
+        <div class="input-group">
+          <label>Nom du décor</label>
+          <input type="text" id="decor-name" placeholder="Ex: Salon Vintage...">
+        </div>
+        <div class="input-group">
+          <label>Description (optionnel)</label>
+          <textarea id="decor-desc" placeholder="Décrivez ce décor..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="createDecor()">Créer le décor</button>
+        <button class="btn btn-secondary" onclick="closeDecorModal()">Annuler</button>
+      </div>
+    </div>
+
+    <!-- New Rental Modal -->
+    <div class="modal-overlay" id="rental-modal">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <h2 class="modal-title">📋 Nouvelle Location</h2>
+        <div class="input-group">
+          <label>Nom du loueur</label>
+          <input type="text" id="rental-name" placeholder="Nom du client...">
+        </div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Date location</label>
+            <input type="date" id="rental-start">
+          </div>
+          <div class="input-group">
+            <label>Date retour</label>
+            <input type="date" id="rental-end">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Notes (optionnel)</label>
+          <textarea id="rental-notes" placeholder="Informations supplémentaires..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="createRental()">Créer la location</button>
+        <button class="btn btn-secondary" onclick="closeRentalModal()">Annuler</button>
+      </div>
+    </div>
+
+    <!-- Side Menu -->
+    <div class="menu-overlay" id="side-menu" onclick="toggleMenu()">
+      <div class="menu-panel" onclick="event.stopPropagation()">
+        <h3 class="menu-title">⚙️ Menu</h3>
+        
+        <div class="menu-item" onclick="shareData()">
+          <span>📤</span> Partager les données
+        </div>
+        <div class="menu-item" onclick="exportData()">
+          <span>💾</span> Télécharger sauvegarde
+        </div>
+        <label class="menu-item">
+          <span>📥</span> Importer des données
+          <input type="file" accept=".json" onchange="importData(event)">
+        </label>
+        
+        <div class="menu-section">
+          <div class="menu-section-title">Partager l'app</div>
+          <div class="menu-item" onclick="shareAppLink()">
+            <span>🔗</span> Envoyer le lien
+          </div>
+        </div>
+        
+        <div class="menu-tip">
+          <div class="menu-tip-title">💡 Astuce</div>
+          <div class="menu-tip-text">Pour installer l'app : Safari → Partager → "Sur l'écran d'accueil"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo Viewer -->
+    <div class="photo-viewer" id="photo-viewer">
+      <div class="photo-viewer-header">
+        <button class="photo-viewer-close" onclick="closePhotoViewer()">✕ Fermer</button>
+        <span class="photo-viewer-count" id="photo-count"></span>
+      </div>
+      <div class="photo-viewer-img">
+        <img id="photo-viewer-img" src="" alt="">
+      </div>
+      <div class="photo-viewer-actions">
+        <button class="btn btn-danger" onclick="deleteCurrentPhoto()">🗑️ Supprimer</button>
+      </div>
+    </div>
+
+    <!-- Hidden file input for photos -->
+    <input type="file" id="photo-input" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)">
+  </div>
+
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW registered'))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+
+    // PWA Install
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Check if already dismissed
+      if (!localStorage.getItem('install-dismissed')) {
+        document.getElementById('install-banner').classList.add('show');
+      }
+    });
+
+    document.getElementById('install-btn').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('install-banner').classList.remove('show');
+      }
+    });
+
+    function dismissInstallBanner() {
+      document.getElementById('install-banner').classList.remove('show');
+      localStorage.setItem('install-dismissed', 'true');
+    }
+
+    // Check if running as PWA
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('install-banner').classList.remove('show');
+    }
+
+    // State
+    let decors = JSON.parse(localStorage.getItem('decor-manager-data') || '[]');
+    let currentView = 'dashboard';
+    let selectedDecorId = null;
+    let selectedRentalId = null;
+    let currentPhotoIndex = null;
+
+    // Save to localStorage
+    function saveData() {
+      localStorage.setItem('decor-manager-data', JSON.stringify(decors));
+    }
+
+    // Format dates
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function formatShortDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short'
+      });
+    }
+
+    // Get rental status
+    function getRentalStatus(rental) {
+      const now = new Date();
+      const start = new Date(rental.startDate);
+      const end = new Date(rental.endDate);
+      
+      if (now < start) return { label: 'À venir', class: 'upcoming' };
+      if (now > end) return { label: 'Terminée', class: 'completed' };
+      return { label: 'En cours', class: 'active' };
+    }
+
+    // Escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Render dashboard
+    function renderDashboard() {
+      currentView = 'dashboard';
+      selectedDecorId = null;
+      selectedRentalId = null;
+      
+      const totalRentals = decors.reduce((sum, d) => sum + d.rentals.length, 0);
+      const totalPhotos = decors.reduce((sum, d) => 
+        sum + d.rentals.reduce((s, r) => s + r.photos.length, 0), 0);
+
+      let html = `
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-value">${decors.length}</div>
+            <div class="stat-label">Décors</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${totalRentals}</div>
+            <div class="stat-label">Locations</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${totalPhotos}</div>
+            <div class="stat-label">Photos</div>
+          </div>
+        </div>
+      `;
+
+      if (decors.length === 0) {
+        html += `
+          <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <div class="empty-title">Aucun décor</div>
+            <div class="empty-text">Appuyez sur + pour créer votre premier décor</div>
+          </div>
+        `;
+      } else {
+        html += '<div class="grid">';
+        decors.forEach(decor => {
+          const lastPhoto = decor.rentals.flatMap(r => r.photos).slice(-1)[0];
+          html += `
+            <div class="card" onclick="renderDecorDetail('${decor.id}')">
+              <div class="card-cover">
+                ${lastPhoto 
+                  ? `<img src="${lastPhoto.data}" alt="${escapeHtml(decor.name)}" loading="lazy">`
+                  : '<span class="placeholder">🖼️</span>'
+                }
+                <span class="card-badge">${decor.rentals.length} loc.</span>
+              </div>
+              <div class="card-body">
+                <div class="card-title">${escapeHtml(decor.name)}</div>
+                ${decor.description ? `<div class="card-meta">${escapeHtml(decor.description)}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+
+      document.getElementById('main-content').innerHTML = html;
+      document.getElementById('fab').classList.remove('hidden');
+    }
+
+    // Render decor detail
+    function renderDecorDetail(decorId) {
+      currentView = 'decor-detail';
+      selectedDecorId = decorId;
+      
+      const decor = decors.find(d => d.id == decorId);
+      if (!decor) return renderDashboard();
+
+      let html = `
+        <button class="back-btn" onclick="renderDashboard()">← Retour</button>
+        <h1 class="section-title">${escapeHtml(decor.name)}</h1>
+        ${decor.description ? `<p class="section-meta">${escapeHtml(decor.description)}</p>` : ''}
+        
+        <div class="action-bar">
+          <button class="action-btn" onclick="openRentalModal()">➕ Location</button>
+          <button class="action-btn danger" onclick="deleteDecor('${decor.id}')">🗑️</button>
+        </div>
+      `;
+
+      if (decor.rentals.length === 0) {
+        html += `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-title">Aucune location</div>
+            <div class="empty-text">Ajoutez une location pour ce décor</div>
+          </div>
+        `;
+      } else {
+        // Sort by date (most recent first)
+        const sortedRentals = [...decor.rentals].sort((a, b) => 
+          new Date(b.startDate) - new Date(a.startDate)
+        );
+        
+        sortedRentals.forEach(rental => {
+          const status = getRentalStatus(rental);
+          html += `
+            <div class="rental-card" onclick="renderRentalDetail('${decor.id}', '${rental.id}')">
+              <div class="rental-header">
+                <div class="rental-name">👤 ${escapeHtml(rental.renterName)}</div>
+                <span class="badge ${status.class}">${status.label}</span>
+              </div>
+              <div class="rental-dates">
+                <span>📅 ${formatShortDate(rental.startDate)} → ${formatShortDate(rental.endDate)}</span>
+                <span>📸 ${rental.photos.length}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      document.getElementById('main-content').innerHTML = html;
+      document.getElementById('fab').classList.add('hidden');
+    }
+
+    // Render rental detail
+    function renderRentalDetail(decorId, rentalId) {
+      currentView = 'rental-detail';
+      selectedDecorId = decorId;
+      selectedRentalId = rentalId;
+      
+      const decor = decors.find(d => d.id == decorId);
+      const rental = decor?.rentals.find(r => r.id == rentalId);
+      if (!decor || !rental) return renderDecorDetail(decorId);
+
+      const status = getRentalStatus(rental);
+
+      let html = `
+        <button class="back-btn" onclick="renderDecorDetail('${decorId}')">← ${escapeHtml(decor.name)}</button>
+        
+        <div class="title-row">
+          <h1 class="section-title" style="margin:0">👤 ${escapeHtml(rental.renterName)}</h1>
+          <span class="badge ${status.class}">${status.label}</span>
+        </div>
+        <p class="section-meta">📅 ${formatDate(rental.startDate)} → ${formatDate(rental.endDate)}</p>
+        ${rental.notes ? `<p class="section-meta">📝 ${escapeHtml(rental.notes)}</p>` : ''}
+        
+        <div class="action-bar">
+          <button class="action-btn" onclick="shareRental('${decorId}', '${rentalId}')">📤 Partager</button>
+          <button class="action-btn danger" onclick="deleteRental('${decorId}', '${rentalId}')">🗑️</button>
+        </div>
+        
+        <div class="dropzone" onclick="document.getElementById('photo-input').click()">
+          <div class="dropzone-icon">📸</div>
+          <div class="dropzone-title">Ajouter des photos</div>
+          <div class="dropzone-text">Appuyez pour prendre ou importer</div>
+        </div>
+      `;
+
+      if (rental.photos.length > 0) {
+        html += '<div class="photo-grid">';
+        rental.photos.forEach((photo, index) => {
+          html += `
+            <div class="photo-item" onclick="openPhotoViewer(${index})">
+              <img src="${photo.data}" alt="${escapeHtml(photo.name)}" loading="lazy">
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+
+      document.getElementById('main-content').innerHTML = html;
+      document.getElementById('fab').classList.add('hidden');
+    }
+
+    // Handle FAB click
+    function handleFabClick() {
+      if (currentView === 'dashboard') {
+        openDecorModal();
+      }
+    }
+
+    // Modal functions
+    function openDecorModal() {
+      document.getElementById('decor-modal').classList.add('show');
+      setTimeout(() => document.getElementById('decor-name').focus(), 300);
+    }
+
+    function closeDecorModal() {
+      document.getElementById('decor-modal').classList.remove('show');
+      document.getElementById('decor-name').value = '';
+      document.getElementById('decor-desc').value = '';
+    }
+
+    function openRentalModal() {
+      document.getElementById('rental-modal').classList.add('show');
+      setTimeout(() => document.getElementById('rental-name').focus(), 300);
+    }
+
+    function closeRentalModal() {
+      document.getElementById('rental-modal').classList.remove('show');
+      document.getElementById('rental-name').value = '';
+      document.getElementById('rental-start').value = '';
+      document.getElementById('rental-end').value = '';
+      document.getElementById('rental-notes').value = '';
+    }
+
+    // Create decor
+    function createDecor() {
+      const name = document.getElementById('decor-name').value.trim();
+      const description = document.getElementById('decor-desc').value.trim();
+      
+      if (!name) return;
+      
+      decors.push({
+        id: Date.now().toString(),
+        name,
+        description,
+        rentals: [],
+        createdAt: new Date().toISOString()
+      });
+      
+      saveData();
+      closeDecorModal();
+      renderDashboard();
+    }
+
+    // Create rental
+    function createRental() {
+      const renterName = document.getElementById('rental-name').value.trim();
+      const startDate = document.getElementById('rental-start').value;
+      const endDate = document.getElementById('rental-end').value;
+      const notes = document.getElementById('rental-notes').value.trim();
+      
+      if (!renterName || !startDate || !endDate) return;
+      
+      const decor = decors.find(d => d.id == selectedDecorId);
+      if (!decor) return;
+      
+      decor.rentals.push({
+        id: Date.now().toString(),
+        renterName,
+        startDate,
+        endDate,
+        notes,
+        photos: [],
+        createdAt: new Date().toISOString()
+      });
+      
+      saveData();
+      closeRentalModal();
+      renderDecorDetail(selectedDecorId);
+    }
+
+    // Delete functions
+    function deleteDecor(decorId) {
+      if (!confirm('Supprimer ce décor et toutes ses locations ?')) return;
+      decors = decors.filter(d => d.id != decorId);
+      saveData();
+      renderDashboard();
+    }
+
+    function deleteRental(decorId, rentalId) {
+      if (!confirm('Supprimer cette location ?')) return;
+      const decor = decors.find(d => d.id == decorId);
+      if (!decor) return;
+      decor.rentals = decor.rentals.filter(r => r.id != rentalId);
+      saveData();
+      renderDecorDetail(decorId);
+    }
+
+    // Photo handling
+    function handlePhotoUpload(event) {
+      const files = Array.from(event.target.files);
+      const decor = decors.find(d => d.id == selectedDecorId);
+      const rental = decor?.rentals.find(r => r.id == selectedRentalId);
+      if (!rental) return;
+
+      let processed = 0;
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          rental.photos.push({
+            id: (Date.now() + Math.random()).toString(),
+            data: e.target.result,
+            name: file.name,
+            addedAt: new Date().toISOString()
+          });
+          processed++;
+          if (processed === files.length) {
+            saveData();
+            renderRentalDetail(selectedDecorId, selectedRentalId);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      event.target.value = '';
+    }
+
+    function openPhotoViewer(index) {
+      currentPhotoIndex = index;
+      const decor = decors.find(d => d.id == selectedDecorId);
+      const rental = decor?.rentals.find(r => r.id == selectedRentalId);
+      if (!rental) return;
+
+      document.getElementById('photo-viewer-img').src = rental.photos[index].data;
+      document.getElementById('photo-count').textContent = `${index + 1} / ${rental.photos.length}`;
+      document.getElementById('photo-viewer').classList.add('show');
+    }
+
+    function closePhotoViewer() {
+      document.getElementById('photo-viewer').classList.remove('show');
+      currentPhotoIndex = null;
+    }
+
+    function deleteCurrentPhoto() {
+      if (!confirm('Supprimer cette photo ?')) return;
+      
+      const decor = decors.find(d => d.id == selectedDecorId);
+      const rental = decor?.rentals.find(r => r.id == selectedRentalId);
+      if (!rental) return;
+
+      rental.photos.splice(currentPhotoIndex, 1);
+      saveData();
+      closePhotoViewer();
+      renderRentalDetail(selectedDecorId, selectedRentalId);
+    }
+
+    // Menu
+    function toggleMenu() {
+      document.getElementById('side-menu').classList.toggle('show');
+    }
+
+    // Export/Import/Share
+    function exportData() {
+      const dataStr = JSON.stringify(decors, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `decors-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toggleMenu();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          decors = JSON.parse(e.target.result);
+          saveData();
+          toggleMenu();
+          renderDashboard();
+          alert('Données importées avec succès !');
+        } catch (err) {
+          alert('Fichier invalide');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    async function shareData() {
+      const dataStr = JSON.stringify(decors, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const file = new File([blob], `decors-${new Date().toISOString().split('T')[0]}.json`, { type: 'application/json' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'Décor Manager - Sauvegarde',
+            text: 'Mes données Décor Manager'
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') exportData();
+        }
+      } else {
+        exportData();
+      }
+      toggleMenu();
+    }
+
+    async function shareAppLink() {
+      const url = window.location.href;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Décor Manager',
+            text: 'Application de gestion de photos pour location de décors',
+            url: url
+          });
+        } catch (err) {
+          // User cancelled
+        }
+      } else {
+        navigator.clipboard.writeText(url);
+        alert('Lien copié !');
+      }
+      toggleMenu();
+    }
+
+    async function shareRental(decorId, rentalId) {
+      const decor = decors.find(d => d.id == decorId);
+      const rental = decor?.rentals.find(r => r.id == rentalId);
+      if (!rental) return;
+
+      const report = `
+RAPPORT DE LOCATION
+═══════════════════
+
+📋 DÉCOR
+${decor.name}
+${decor.description || ''}
+
+👤 LOUEUR
+${rental.renterName}
+
+📅 DATES
+Location: ${formatDate(rental.startDate)}
+Retour: ${formatDate(rental.endDate)}
+
+${rental.notes ? `📝 NOTES\n${rental.notes}\n` : ''}
+📸 PHOTOS: ${rental.photos.length}
+
+───────────────────
+Généré le ${new Date().toLocaleDateString('fr-FR')}
+      `.trim();
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Location - ${rental.renterName}`,
+            text: report
+          });
+        } catch (err) {
+          // User cancelled
+        }
+      } else {
+        navigator.clipboard.writeText(report);
+        alert('Rapport copié !');
+      }
+    }
+
+    // Close modals on overlay click
+    document.getElementById('decor-modal').addEventListener('click', closeDecorModal);
+    document.getElementById('rental-modal').addEventListener('click', closeRentalModal);
+
+    // Handle back button
+    window.addEventListener('popstate', () => {
+      if (currentView === 'rental-detail') {
+        renderDecorDetail(selectedDecorId);
+      } else if (currentView === 'decor-detail') {
+        renderDashboard();
+      }
+    });
+
+    // Initialize
+    renderDashboard();
+  </script>
+</body>
+</html>
